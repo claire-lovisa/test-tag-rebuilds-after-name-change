@@ -6,7 +6,7 @@ steps:
 - name: build-and-push
   image: plugins/docker
   settings:
-    repo: lblod/meeting-service
+    repo: claire-lovisa/test-tag-rebuilds-after-name-update
     username:
       from_secret: docker_username
     password:
