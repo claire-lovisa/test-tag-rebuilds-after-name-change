@@ -1,74 +1,77 @@
+---
 kind: pipeline
 type: docker
-name: push-latest
+name: verify
 steps:
-- name: build-and-push
+- name: install
+  image: node:14
+  commands:
+    - npm install
+- name: lint
+  image: node:14
+  commands:
+    - npm run lint
+- name: build-dry-run
   image: plugins/docker
   settings:
-    repo: ${DRONE_REPO}
+    repo: lblod/notulen-prepublish-service
+    dry_run: true
+    purge: true
+trigger:
+  event:
+    - push
+---
+kind: pipeline
+type: docker
+name: push-latest-build
+steps:
+- name: push-latest-build
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
     username:
       from_secret: docker_username
     password:
       from_secret: docker_password
 trigger:
   branch:
-  - master
+    - master
   event:
     exclude:
     - pull_request
 ---
 kind: pipeline
 type: docker
-name: push-feature-build
+name: release
 steps:
-- name: submodules
-  image: alpine/git
-  commands:
-  - git submodule update --init --recursive
-- name: push-feature-build
+- name: build-dry-run
   image: plugins/docker
   settings:
-    repo: ${DRONE_REPO_NAMESPACE}/${DRONE_REPO_NAME}
-    tags: ${DRONE_BRANCH/\//-}
+    repo: lblod/notulen-prepublish-service
+    dry_run: true
+- name: push-tagged-build
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
+    tags: ${DRONE_TAG##v}
     username:
       from_secret: docker_username
     password:
       from_secret: docker_password
     purge: true
 trigger:
-  branch:
-    - "*/*"
   event:
-    exclude:
-      - pull_request
+    - tag
 ---
-kind: pipeline
-type: docker
-name: push-release
-steps:
-- name: build-and-push-tag
-  image: plugins/docker
-  settings:
-    repo: ${DRONE_REPO}
-    tags: ${DRONE_TAG##v} # strips v from the tag
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-trigger:
-  event:
-  - tag
+kind: secret
+name: docker_username
+data: lI+pVVKw37YqgJSRkHzFBO838q3CpXcWfALx+oL4i3g1xaoIZyQi3w==
 ---
-kind: pipeline
-type: docker
-name: dry-run
-steps:
-- name: dry-run
-  image: plugins/docker
-  settings:
-    repo: ${DRONE_REPO}
-    dry_run: true
-trigger:
-  event:
-  - pull_request
+kind: secret
+name: docker_password
+data: Rlh766Mh1Ikv3vCBRSA3tYa/qYZS6EmMf1RYhwsW6qbLT0TlZhW7MHQiKu6yYbdg4HQ8MyRROFSqAFW1Zdxx7A==
+---
+kind: signature
+hmac: a3257e10990c444685c184e83bb026e3d0af8eed07c3f691215dec8cae29c87b
 
+...
