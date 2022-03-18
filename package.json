@@ -1,0 +1,15 @@
+{
+  "name": "test-tag-rebuilds-after-name-update",
+  "version": "0.0.1",
+  "description": "Test service : name repo & rebuild tags",
+  "main": "app.js",
+  "author": "Claire Lovisa",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/claire-lovisa/test-tag-rebuilds-after-name-update"
+  }
+}
